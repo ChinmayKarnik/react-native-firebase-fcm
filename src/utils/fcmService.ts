@@ -117,18 +117,33 @@ export function onTokenRefresh(callback: (token: string) => void) {
  * - Show a custom in-app notification
  * - Update UI directly
  * - Show a native notification manually
+ * 
+ * IMPORTANT: This handles BOTH notification and data messages!
+ * - Notification messages: Have 'notification' field
+ * - Data messages: Only have 'data' field
  */
 export function onForegroundMessage(
   callback: (message: any) => void,
 ) {
   return messaging().onMessage(async (remoteMessage) => {
-    console.log('📱 Foreground notification received:', remoteMessage);
+    console.log('📱 Foreground message received:', remoteMessage);
     
-    // Extract notification data
+    // Extract notification and data
     const { notification, data } = remoteMessage;
     
-    console.log('📋 Notification:', notification);
-    console.log('📦 Data:', data);
+    if (notification) {
+      console.log('📋 Notification payload:', notification);
+    }
+    
+    if (data) {
+      console.log('📦 Data payload:', data);
+      
+      // Check if this is a data-only message
+      if (!notification) {
+        console.log('💡 This is a DATA-ONLY message (no notification)');
+        console.log('   Your app has full control over what to do with it!');
+      }
+    }
     
     callback(remoteMessage);
   });
@@ -173,17 +188,38 @@ export function onNotificationOpenedApp(
  * This handler runs even when the app is quit/killed.
  * It must be registered outside of your application code (typically in index.js).
  * 
+ * CRITICAL: This ONLY handles DATA messages!
+ * - Notification messages are handled automatically by the system
+ * - Data messages arrive here for custom processing
+ * 
  * Use this for:
  * - Data-only messages that need processing
  * - Updating local storage
- * - Showing custom notifications
+ * - Showing custom notifications using local notification API
+ * 
+ * WARNING: Keep this handler lightweight! It runs in a separate JS context.
  */
 export function registerBackgroundHandler() {
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     console.log('🌙 Background message received:', remoteMessage);
     
-    // Handle background message here
-    // This runs in a separate JS context, so keep it light
+    const { data } = remoteMessage;
+    
+    if (data) {
+      console.log('📦 Data payload in background:', data);
+      
+      // Example: Process different data message types
+      if (data.type === 'data_only') {
+        console.log('💡 Received data-only message in background');
+        console.log('   No notification was shown automatically!');
+        console.log('   You could show a local notification here if needed');
+      }
+      
+      // You could:
+      // 1. Update local database
+      // 2. Show local notification
+      // 3. Pre-fetch data for better UX when user opens app
+    }
     
     return Promise.resolve();
   });

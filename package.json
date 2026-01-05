@@ -10,9 +10,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-firebase/app": "^23.7.0",
     "@react-native-firebase/messaging": "^23.7.0",
     "@react-native/new-app-screen": "0.82.1",
+    "google-auth-library": "^10.5.0",
     "react": "19.1.1",
     "react-native": "0.82.1",
     "react-native-safe-area-context": "^5.5.2"

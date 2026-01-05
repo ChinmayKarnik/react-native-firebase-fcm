@@ -12,6 +12,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import Clipboard from '@react-native-clipboard/clipboard';
 import {
   requestUserPermission,
   getFCMToken,
@@ -42,12 +43,24 @@ function AppContent() {
 
     // Setup listeners
     const unsubscribeForeground = onForegroundMessage((message) => {
-      // Show alert when notification received in foreground
-      Alert.alert(
-        'New Notification!',
-        message.notification?.body || 'You have a new message',
-        [{ text: 'OK' }]
-      );
+      const { notification, data } = message;
+      
+      // Check if it's a data-only message
+      if (data && !notification) {
+        Alert.alert(
+          '📦 Data Message Received!',
+          `Type: ${data.type || 'unknown'}\nData: ${JSON.stringify(data, null, 2)}`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        // Regular notification message
+        Alert.alert(
+          'New Notification!',
+          notification?.body || 'You have a new message',
+          [{ text: 'OK' }]
+        );
+      }
+      
       setLastNotification(message);
     });
 
@@ -116,14 +129,14 @@ function AppContent() {
           style={styles.button}
           onPress={() => {
             if (fcmToken) {
-              Alert.alert('FCM Token', fcmToken, [
-                { text: 'Copy', onPress: () => {} },
+              Clipboard.setString(fcmToken);
+              Alert.alert('✅ Copied!', 'FCM Token copied to clipboard', [
                 { text: 'OK' }
               ]);
             }
           }}
         >
-          <Text style={styles.buttonText}>Show Full Token</Text>
+          <Text style={styles.buttonText}>Copy Token to Clipboard</Text>
         </TouchableOpacity>
       </View>
 
