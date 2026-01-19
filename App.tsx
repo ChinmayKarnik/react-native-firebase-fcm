@@ -20,6 +20,7 @@ import {
   onNotificationOpenedApp,
   onTokenRefresh,
 } from './src/utils/fcmService';
+import { notificationChannelService } from './src/services/notificationChannelService';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -86,6 +87,9 @@ function AppContent() {
   }, []);
 
   const initializeFCM = async () => {
+    // Initialize notification channels FIRST (before any notifications arrive)
+    await notificationChannelService.initializeChannels();
+
     // Request permission
     const hasPermission = await requestUserPermission();
 
