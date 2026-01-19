@@ -21,6 +21,7 @@ import {
   onTokenRefresh,
 } from './src/utils/fcmService';
 import { notificationChannelService } from './src/services/notificationChannelService';
+import { topicService, TOPICS } from './src/services/topicService';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -97,6 +98,13 @@ function AppContent() {
       // Get FCM token
       const token = await getFCMToken();
       setFcmToken(token);
+
+      // Subscribe to default topics
+      // This happens AFTER permission granted
+      // Why? No point subscribing if user denied notifications
+      await topicService.subscribeToDefaultTopics();
+      
+      console.log('✅ FCM initialization complete');
     } else {
       Alert.alert(
         'Permission Denied',
@@ -142,6 +150,31 @@ function AppContent() {
         >
           <Text style={styles.buttonText}>Copy Token to Clipboard</Text>
         </TouchableOpacity>
+
+        {/* Topic Management Buttons */}
+        <View style={styles.topicSection}>
+          <Text style={styles.label}>Topic Subscriptions:</Text>
+          
+          <TouchableOpacity
+            style={[styles.button, styles.topicButton]}
+            onPress={async () => {
+              await topicService.subscribeToTopic(TOPICS.TECH_NEWS);
+              Alert.alert('✅ Subscribed', 'You will now receive Tech News updates');
+            }}
+          >
+            <Text style={styles.buttonText}>Subscribe to Tech News</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.button, styles.topicButton]}
+            onPress={async () => {
+              await topicService.unsubscribeFromTopic(TOPICS.TECH_NEWS);
+              Alert.alert('📭 Unsubscribed', 'You will no longer receive Tech News');
+            }}
+          >
+            <Text style={styles.buttonText}>Unsubscribe from Tech News</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <NewAppScreen
@@ -197,6 +230,15 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: '600',
+  },
+  topicSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+  },
+  topicButton: {
+    backgroundColor: '#34C759',
   },
 });
 
