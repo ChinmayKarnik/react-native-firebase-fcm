@@ -10,6 +10,12 @@
 import messaging from '@react-native-firebase/messaging';
 import { Platform, PermissionsAndroid } from 'react-native';
 
+// Backend URL Configuration
+// For Android Emulator: http://10.0.2.2:3000
+// For iOS Simulator: http://localhost:3000
+// For Physical Device: Use your Mac's local IP
+const BACKEND_URL = 'http://192.168.0.20:3000';
+
 /**
  * Request permission to show notifications
  * 
@@ -73,10 +79,10 @@ export async function getFCMToken(): Promise<string | null> {
     
     if (token) {
       console.log('✅ FCM Token:', token);
-      console.log('💡 In production, send this token to your backend server');
+      console.log('💡 Registering token with backend...');
       
-      // TODO: Send token to your backend
-      // await sendTokenToBackend(token);
+      // Send token to backend
+      await registerToken(token);
       
       return token;
     } else {
@@ -100,10 +106,10 @@ export async function getFCMToken(): Promise<string | null> {
 export function onTokenRefresh(callback: (token: string) => void) {
   return messaging().onTokenRefresh((token) => {
     console.log('🔄 FCM Token refreshed:', token);
-    console.log('💡 Update your backend with the new token');
+    console.log('💡 Updating backend with new token...');
     
-    // TODO: Send new token to your backend
-    // await sendTokenToBackend(token);
+    // Update backend with new token
+    registerToken(token);
     
     callback(token);
   });
@@ -223,4 +229,119 @@ export function registerBackgroundHandler() {
     
     return Promise.resolve();
   });
+}
+
+// ============================================================================
+// TOKEN MANAGEMENT - Backend Integration
+// ============================================================================
+
+/**
+ * Register or update FCM token with backend
+ * 
+ * This should be called:
+ * - When app launches (to ensure backend is in sync)
+ * - When token refreshes
+ * - After user logs in (to associate with userId)
+ */
+async function registerToken(token: string, userId?: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${BACKEND_URL}/register-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token,
+        userId,
+        platform: Platform.OS,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Backend responded with ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ Token registered with backend:', result.message);
+    return true;
+  } catch (error) {
+    console.warn('⚠️ Failed to register token with backend:', error);
+    // Don't fail the app if backend is down
+    // Token will be synced on next launch
+    return false;
+  }
+}
+
+/**
+ * Associate current FCM token with a userId (call after login)
+ * 
+ * Usage:
+ *   await associateTokenWithUser('user123');
+ */
+export async function associateTokenWithUser(userId: string): Promise<boolean> {
+  try {
+    const token = await messaging().getToken();
+    
+    if (!token) {
+      console.error('❌ No FCM token available');
+      return false;
+    }
+
+    const response = await fetch(`${BACKEND_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token, userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Backend responded with ${response.status}`);
+    }
+
+    console.log(`✅ Token associated with user: ${userId}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to associate token with user:', error);
+    return false;
+  }
+}
+
+/**
+ * Remove FCM token from backend (call on logout)
+ * 
+ * Usage:
+ *   await removeTokenFromBackend();
+ */
+export async function removeTokenFromBackend(): Promise<boolean> {
+  try {
+    const token = await messaging().getToken();
+    
+    if (!token) {
+      console.warn('⚠️ No FCM token to remove');
+      return true; // Not an error, just no token
+    }
+
+    const response = await fetch(`${BACKEND_URL}/logout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Backend responded with ${response.status}`);
+    }
+
+    console.log('✅ Token removed from backend');
+    
+    // Optionally delete token locally
+    // await messaging().deleteToken();
+    
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to remove token from backend:', error);
+    return false;
+  }
 }
