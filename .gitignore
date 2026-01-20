@@ -76,4 +76,16 @@ yarn-error.log
 
 # Co-pilot chats
 Co-pilot chats/
+
+# Secrets and sensitive files
 secrets/
+*.json
+!package.json
+!tsconfig.json
+!app.json
+!jest.config.json
+
+# Upwork and personal files
+upwork-project-description.txt
+**/reply*.txt
+context.txt

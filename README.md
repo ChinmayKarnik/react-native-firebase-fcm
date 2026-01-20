@@ -1,97 +1,302 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Firebase Cloud Messaging - Production Implementation
 
-# Getting Started
+> **A comprehensive React Native implementation demonstrating enterprise-grade Firebase Cloud Messaging architecture and best practices.**
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+![React Native](https://img.shields.io/badge/React_Native-0.82.1-61DAFB?logo=react)
+![Firebase](https://img.shields.io/badge/Firebase-FCM_V1_API-FFCA28?logo=firebase)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-3178C6?logo=typescript)
+![Android](https://img.shields.io/badge/Android-API_24+-3DDC84?logo=android)
 
-## Step 1: Start Metro
+## 🎯 Project Overview
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+This project showcases production-ready Firebase Cloud Messaging implementation patterns for React Native applications, covering advanced scenarios including multi-device token management, background message processing, notification channels, and scalable topic-based messaging.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## ✨ Key Features
 
-```sh
-# Using npm
-npm start
+### Core FCM Implementation
+- **Multi-Device Token Management** - Synchronized token lifecycle across devices with automated cleanup
+- **Message Type Handling** - Notification messages, data messages, and combined payloads
+- **App State Processing** - Foreground, background, and quit state message handlers
+- **Headless JS Workers** - Background task processing without UI dependencies
 
-# OR using Yarn
-yarn start
+### Android Notification Channels
+- **Channel Architecture** - Importance-based categorization (HIGH, DEFAULT, LOW)
+- **User Control** - Granular notification preferences per category
+- **Notifee Integration** - Advanced channel management and local notifications
+
+### Scalable Messaging
+- **Topic Subscriptions** - Pub/Sub pattern for efficient group messaging
+- **Token Synchronization** - Multi-device support with backend coordination
+- **Stray Token Cleanup** - Automated detection and removal of invalid tokens
+
+### Backend Integration
+- **FCM V1 API** - Modern API with service account authentication
+- **Testing Utilities** - Node.js scripts for message delivery validation
+- **Channel-Specific Delivery** - Targeted notifications with channel routing
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    FCM Backend Services                      │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │ FCM V1 API  │  │ Service Auth │  │ Topic Manager│       │
+│  └─────────────┘  └──────────────┘  └──────────────┘       │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│              React Native Application Layer                  │
+│  ┌──────────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │ Message Handlers │  │ Token Service│  │ Topic Service│  │
+│  │ - Foreground     │  │ - Lifecycle  │  │ - Subscribe  │  │
+│  │ - Background     │  │ - Refresh    │  │ - Manage     │  │
+│  │ - Notification   │  │ - Cleanup    │  │ - Sync       │  │
+│  └──────────────────┘  └──────────────┘  └──────────────┘  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │           Notification Channel Service                │  │
+│  │  - Channel Creation  - Importance Levels             │  │
+│  │  - User Preferences  - System Integration            │  │
+│  └──────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   Native Layer (Android)                     │
+│  ┌──────────────┐  ┌───────────────┐  ┌─────────────────┐  │
+│  │ FCM Service  │  │ Notification  │  │ Channel Manager │  │
+│  │ (Always On)  │  │ Manager       │  │                 │  │
+│  └──────────────┘  └───────────────┘  └─────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Step 2: Build and run your app
+## 📚 Technical Implementation
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Message Processing Flow
 
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+**Notification Messages:**
+```typescript
+// Automatic system handling in background/quit
+// Custom handling in foreground
+onForegroundMessage((message) => {
+  // Display custom UI or system alert
+});
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+**Data Messages:**
+```typescript
+// Headless JS processing in all states
+setBackgroundMessageHandler(async (message) => {
+  // Background logic without UI
+  await processDataPayload(message.data);
+});
 ```
 
-Then, and every time you update your native dependencies, run:
+### Token Management Strategy
 
-```sh
-bundle exec pod install
+```typescript
+// Registration with multi-device support
+const token = await getFCMToken();
+await registerTokenWithBackend(userId, token, deviceInfo);
+
+// Automated refresh handling
+onTokenRefresh(async (newToken) => {
+  await updateBackendToken(newToken);
+});
+
+// Cleanup on logout
+await removeTokenFromBackend(currentToken);
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### Notification Channels
 
-```sh
-# Using npm
-npm run ios
+```typescript
+// Channel creation at app startup
+await notifee.createChannel({
+  id: 'important_updates',
+  name: 'Important Updates',
+  importance: AndroidImportance.HIGH,
+  sound: 'default',
+  vibration: true
+});
 
-# OR using Yarn
-yarn ios
+// Backend specifies channel
+{
+  android: {
+    notification: { channelId: 'important_updates' }
+  }
+}
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Topic Subscriptions
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```typescript
+// Subscribe to topics
+await messaging().subscribeToTopic('tech_news');
 
-## Step 3: Modify your app
+// Backend sends to entire topic
+await sendToTopic('tech_news', {
+  notification: { title, body }
+});
+```
 
-Now that you have successfully run the app, let's make changes!
+## 🛠️ Tech Stack
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- **Frontend:** React Native 0.82.1, TypeScript 5.8.3
+- **Firebase:** @react-native-firebase/messaging 23.7.0
+- **Notifications:** @notifee/react-native 9.1.8
+- **Backend:** Node.js, Firebase Admin SDK, FCM V1 API
+- **Authentication:** Google Service Account
+- **Build:** Android SDK 36, Gradle 9.0.0
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 📦 Project Structure
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+```
+.
+├── src/
+│   ├── services/
+│   │   ├── fcmService.ts              # Core FCM functionality
+│   │   ├── topicService.ts            # Topic management
+│   │   └── notificationChannelService.ts  # Channel creation
+│   ├── constants/
+│   │   └── notificationChannels.ts    # Channel definitions
+│   └── utils/
+├── scripts/
+│   ├── send-data-message.js           # Data message testing
+│   ├── send-to-channel.js             # Channel-specific delivery
+│   └── send-to-topic.js               # Topic-based messaging
+├── mock-backend/
+│   ├── server.js                      # Token management API
+│   └── send-notification.js           # Cleanup demonstration
+├── android/                           # Android native configuration
+├── App.tsx                            # Main application
+└── index.js                           # Background handler registration
+```
 
-## Congratulations! :tada:
+## 🚀 Getting Started
 
-You've successfully run and modified your React Native App. :partying_face:
+### Prerequisites
 
-### Now what?
+- Node.js >= 20
+- React Native development environment configured
+- Android Studio and SDK
+- Firebase project with FCM enabled
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+### Installation
 
-# Troubleshooting
+```bash
+# Install dependencies
+npm install
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+# Android setup
+cd android && ./gradlew clean && cd ..
 
-# Learn More
+# Run on Android
+npx react-native run-android
+```
 
-To learn more about React Native, take a look at the following resources:
+### Firebase Configuration
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. Create Firebase project in Firebase Console
+2. Download `google-services.json` → `android/app/`
+3. Generate service account JSON → `secrets/` (gitignored)
+4. Enable Cloud Messaging API in Google Cloud Console
+
+### Testing
+
+```bash
+# Start mock backend
+node mock-backend/server.js
+
+# Send test messages
+node scripts/send-data-message.js YOUR_FCM_TOKEN dataOnly
+node scripts/send-to-topic.js tech_news
+node scripts/send-to-channel.js YOUR_TOKEN important
+```
+
+## 📖 Key Concepts Demonstrated
+
+### Threading Model
+- **JavaScript Thread:** Foreground message processing
+- **Headless JS:** Background/quit state data processing
+- **Native Service:** Always-on FCM listener at system level
+
+### App State Handling
+- **Foreground:** Custom UI, full React access
+- **Background:** Headless JS, AsyncStorage, API calls
+- **Quit:** Headless JS spawned on-demand with high priority
+
+### Production Patterns
+- ✅ Automated token refresh and synchronization
+- ✅ Stray token detection via send failure
+- ✅ Multi-device support with backend coordination
+- ✅ Channel-based importance levels
+- ✅ Topic-based scalable broadcasting
+- ✅ Proper error handling and retry logic
+
+## 🎓 Advanced Features
+
+### Message Priority
+```javascript
+{
+  android: {
+    priority: 'high'  // Required for background data delivery
+  }
+}
+```
+
+### Combined Messages
+```javascript
+{
+  notification: { title, body },  // System display
+  data: { orderId, action }       // Custom payload
+}
+```
+
+### Conditional Logic
+```typescript
+messaging().setBackgroundMessageHandler(async (message) => {
+  if (message.data.type === 'urgent') {
+    await createLocalNotification(message.data);
+  } else {
+    await saveToDatabase(message.data);
+  }
+});
+```
+
+## 📱 Supported Platforms
+
+- ✅ **Android** - Full implementation (API 24+)
+- ⏳ **iOS** - Planned (APNs integration coming soon)
+- ⏳ **Web** - Planned (Web push notifications)
+
+## 🔒 Security Best Practices
+
+- Service account credentials in gitignored `secrets/` directory
+- Environment-based configuration for production
+- Token validation on backend before message delivery
+- Proper error handling for invalid tokens
+
+## 📊 Performance Considerations
+
+- Idempotent channel creation (no overhead on app restart)
+- Efficient topic subscriptions (FCM-managed, no backend storage)
+- Background message batching for reduced battery impact
+- Headless JS timeout handling for long-running tasks
+
+## 🤝 Contributing
+
+This is a demonstration project showcasing FCM implementation patterns. Feel free to fork and adapt for your own use cases.
+
+## 📄 License
+
+MIT License - Feel free to use this code in your projects.
+
+## 🔗 Resources
+
+- [Firebase Cloud Messaging Documentation](https://firebase.google.com/docs/cloud-messaging)
+- [React Native Firebase](https://rnfirebase.io/)
+- [Notifee Documentation](https://notifee.app/)
+- [FCM V1 API Migration Guide](https://firebase.google.com/docs/cloud-messaging/migrate-v1)
+
+---
+
+**Built with expertise in Firebase Cloud Messaging, React Native, and production-grade mobile architecture.**

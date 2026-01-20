@@ -1,6 +1,6 @@
 {
-  "name": "firebase-playground",
-  "version": "0.0.1",
+  "name": "react-native-firebase-fcm",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
