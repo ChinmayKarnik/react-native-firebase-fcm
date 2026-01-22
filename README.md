@@ -1,76 +1,140 @@
-# Firebase Cloud Messaging - Production Implementation
+# Firebase Services - Production Implementation
 
-> **A comprehensive React Native implementation demonstrating enterprise-grade Firebase Cloud Messaging architecture and best practices.**
+> **Comprehensive React Native implementation demonstrating enterprise-grade Firebase integration across multiple services.**
 
 ![React Native](https://img.shields.io/badge/React_Native-0.82.1-61DAFB?logo=react)
-![Firebase](https://img.shields.io/badge/Firebase-FCM_V1_API-FFCA28?logo=firebase)
+![Firebase](https://img.shields.io/badge/Firebase-Multi_Service-FFCA28?logo=firebase)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-3178C6?logo=typescript)
 ![Android](https://img.shields.io/badge/Android-API_24+-3DDC84?logo=android)
 
 ## 🎯 Project Overview
 
-This project showcases production-ready Firebase Cloud Messaging implementation patterns for React Native applications, covering advanced scenarios including multi-device token management, background message processing, notification channels, and scalable topic-based messaging.
+This project demonstrates production-ready Firebase integration patterns for React Native applications, featuring Cloud Messaging, Analytics, Remote Config, Authentication, Crashlytics, Performance Monitoring, In-App Messaging, Deep Linking, and Cloud Storage.
 
-## ✨ Key Features
+## ✨ Implemented Features
 
-### Core FCM Implementation
-- **Multi-Device Token Management** - Synchronized token lifecycle across devices with automated cleanup
-- **Message Type Handling** - Notification messages, data messages, and combined payloads
-- **App State Processing** - Foreground, background, and quit state message handlers
-- **Headless JS Workers** - Background task processing without UI dependencies
+### 📬 Cloud Messaging (FCM)
+- Multi-device token management with automated cleanup
+- Message type handling (notification, data, combined)
+- App state processing (foreground, background, quit)
+- Headless JS workers for background tasks
+- Android notification channels with Notifee
+- Topic-based pub/sub messaging
+- FCM V1 API with service account authentication
 
-### Android Notification Channels
-- **Channel Architecture** - Importance-based categorization (HIGH, DEFAULT, LOW)
-- **User Control** - Granular notification preferences per category
-- **Notifee Integration** - Advanced channel management and local notifications
+### 📊 Analytics
+- Custom event tracking with parameters
+- User properties and identification
+- Screen view tracking
+- Conversion funnel analysis
+- Integration with other Firebase services
 
-### Scalable Messaging
-- **Topic Subscriptions** - Pub/Sub pattern for efficient group messaging
-- **Token Synchronization** - Multi-device support with backend coordination
-- **Stray Token Cleanup** - Automated detection and removal of invalid tokens
+### ⚙️ Remote Config
+- Feature flags for gradual rollouts
+- A/B testing with percentile targeting
+- Dynamic UI configuration
+- Platform-specific parameters
+- App version targeting
+- JSON configuration parsing
 
-### Backend Integration
-- **FCM V1 API** - Modern API with service account authentication
-- **Testing Utilities** - Node.js scripts for message delivery validation
-- **Channel-Specific Delivery** - Targeted notifications with channel routing
+### 🔐 Authentication
+- Email/password sign up and sign in
+- Password reset via email
+- Email verification
+- Auth state persistence
+- User profile management
+- Session management
+
+### 🐛 Crashlytics
+- Fatal crash reporting
+- Non-fatal error tracking
+- Custom logs and breadcrumbs
+- User identification
+- Custom key-value attributes
+- Automatic stacktraces
+
+### 📱 Performance Monitoring
+- HTTP request tracking
+- Custom trace instrumentation
+- Screen rendering metrics
+- Automatic app start tracking
+- Network performance analysis
+
+### 💬 In-App Messaging
+- Event-triggered campaigns
+- Banner and modal messages
+- User targeting and segmentation
+- Message suppression control
+- Analytics integration
+
+### 🔗 Deep Linking
+- React Navigation integration
+- URL scheme handling (myapp://)
+- Dynamic parameter extraction
+- Cross-screen navigation
+- Intent filter configuration
+
+### ☁️ Cloud Storage
+- Image upload from camera/gallery
+- Progress tracking
+- Download URL generation
+- File management
+
+### 📦 App Distribution
+- Release APK generation
+- Firebase distribution platform
+- Tester management
+- Build versioning
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    FCM Backend Services                      │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │ FCM V1 API  │  │ Service Auth │  │ Topic Manager│       │
-│  └─────────────┘  └──────────────┘  └──────────────┘       │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│              React Native Application Layer                  │
-│  ┌──────────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │ Message Handlers │  │ Token Service│  │ Topic Service│  │
-│  │ - Foreground     │  │ - Lifecycle  │  │ - Subscribe  │  │
-│  │ - Background     │  │ - Refresh    │  │ - Manage     │  │
-│  │ - Notification   │  │ - Cleanup    │  │ - Sync       │  │
-│  └──────────────────┘  └──────────────┘  └──────────────┘  │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │           Notification Channel Service                │  │
-│  │  - Channel Creation  - Importance Levels             │  │
-│  │  - User Preferences  - System Integration            │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                   Native Layer (Android)                     │
-│  ┌──────────────┐  ┌───────────────┐  ┌─────────────────┐  │
-│  │ FCM Service  │  │ Notification  │  │ Channel Manager │  │
-│  │ (Always On)  │  │ Manager       │  │                 │  │
-│  └──────────────┘  └───────────────┘  └─────────────────┘  │
+│                        React Native App                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Screens    │  │   Services   │  │ Navigation   │      │
+│  │              │  │              │  │              │      │
+│  │ • Home       │  │ • Analytics  │  │ • Deep Links │      │
+│  │ • Auth       │  │ • Auth       │  │ • Routes     │      │
+│  │ • Remote     │  │ • Crashlytics│  │ • Params     │      │
+│  │   Config     │  │ • Remote     │  │              │      │
+│  │ • Storage    │  │   Config     │  │              │      │
+│  │ • Performance│  │              │  │              │      │
+│  │ • Messaging  │  │              │  │              │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│                                                               │
+├─────────────────────────────────────────────────────────────┤
+│              @react-native-firebase/* SDKs                   │
+│                                                               │
+│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐    │
+│  │ FCM  │ │Remote│ │Auth  │ │Crash │ │Perf  │ │IAM   │    │
+│  │      │ │Config│ │      │ │lytics│ │      │ │      │    │
+│  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘ └──────┘    │
+│                                                               │
+│  ┌──────┐ ┌──────┐ ┌──────┐                                 │
+│  │Analytics Storage│ │ App  │                                 │
+│  │      │ │      │ │ Core │                                 │
+│  └──────┘ └──────┘ └──────┘                                 │
+│                                                               │
+├─────────────────────────────────────────────────────────────┤
+│                     Firebase Platform                        │
+│                                                               │
+│  • Cloud Messaging      • Performance Monitoring             │
+│  • Remote Config        • In-App Messaging                   │
+│  • Authentication       • Cloud Storage                      │
+│  • Crashlytics          • App Distribution                   │
+│  • Analytics                                                  │
+│                                                               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## 📚 Technical Implementation
 
-### Message Processing Flow
+### Cloud Messaging (FCM)
+
+**Message Processing Flow:**
 
 **Notification Messages:**
 ```typescript
@@ -140,35 +204,67 @@ await sendToTopic('tech_news', {
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React Native 0.82.1, TypeScript 5.8.3
-- **Firebase:** @react-native-firebase/messaging 23.7.0
-- **Notifications:** @notifee/react-native 9.1.8
-- **Backend:** Node.js, Firebase Admin SDK, FCM V1 API
-- **Authentication:** Google Service Account
-- **Build:** Android SDK 36, Gradle 9.0.0
+**Frontend:**
+- React Native 0.82.1
+- TypeScript 5.8.3
+- React Navigation 7.3.3
+
+**Firebase SDKs:**
+- @react-native-firebase/app 23.7.0
+- @react-native-firebase/messaging 23.7.0
+- @react-native-firebase/remote-config 23.7.0
+- @react-native-firebase/analytics 23.7.0
+- @react-native-firebase/auth 23.7.0
+- @react-native-firebase/crashlytics 23.7.0
+- @react-native-firebase/storage 23.7.0
+- @react-native-firebase/perf 23.7.0
+- @react-native-firebase/in-app-messaging 23.7.0
+
+**Notifications:**
+- @notifee/react-native 9.1.8
+
+**Build & Platform:**
+- Android SDK 36
+- Gradle 9.0.0
+- minSdkVersion 24
 
 ## 📦 Project Structure
 
 ```
 .
 ├── src/
+│   ├── screens/
+│   │   ├── HomeScreen.tsx                    # Main navigation hub
+│   │   ├── AuthScreen.tsx                    # Authentication flows
+│   │   ├── RemoteConfigScreen.tsx            # Feature flags & A/B tests
+│   │   ├── StorageScreen.tsx                 # File upload/download
+│   │   ├── PerformanceScreen.tsx             # Performance traces
+│   │   ├── InAppMessagingScreen.tsx          # Campaign triggers
+│   │   ├── ProductScreen.tsx                 # Deep link target
+│   │   ├── ProfileScreen.tsx                 # Deep link target
+│   │   └── SettingsScreen.tsx                # Deep link target
 │   ├── services/
-│   │   ├── fcmService.ts              # Core FCM functionality
-│   │   ├── topicService.ts            # Topic management
-│   │   └── notificationChannelService.ts  # Channel creation
-│   ├── constants/
-│   │   └── notificationChannels.ts    # Channel definitions
-│   └── utils/
-├── scripts/
-│   ├── send-data-message.js           # Data message testing
-│   ├── send-to-channel.js             # Channel-specific delivery
-│   └── send-to-topic.js               # Topic-based messaging
-├── mock-backend/
-│   ├── server.js                      # Token management API
-│   └── send-notification.js           # Cleanup demonstration
-├── android/                           # Android native configuration
-├── App.tsx                            # Main application
-└── index.js                           # Background handler registration
+│   │   ├── fcmService.ts                     # Cloud Messaging
+│   │   ├── analyticsService.ts               # Event tracking
+│   │   ├── authService.ts                    # Authentication
+│   │   ├── crashlyticsService.ts             # Error reporting
+│   │   └── remoteConfigService.ts            # Remote config
+│   ├── navigation/
+│   │   ├── AppNavigator.tsx                  # Navigation setup
+│   │   ├── linking.ts                        # Deep link config
+│   │   └── types.ts                          # Route types
+│   └── types/
+│       ├── auth.ts                           # Auth types
+│       └── remoteConfig.ts                   # Config types
+├── android/
+│   ├── app/
+│   │   ├── src/main/
+│   │   │   ├── AndroidManifest.xml           # Deep link intent filters
+│   │   │   └── java/                         # Native modules
+│   │   └── build.gradle                      # Firebase configuration
+│   └── build.gradle                          # Project-level config
+├── App.tsx                                   # Main application
+└── index.js                                  # App entry point
 ```
 
 ## 🚀 Getting Started
@@ -195,100 +291,167 @@ npx react-native run-android
 
 ### Firebase Configuration
 
-1. Create Firebase project in Firebase Console
-2. Download `google-services.json` → `android/app/`
-3. Generate service account JSON → `secrets/` (gitignored)
-4. Enable Cloud Messaging API in Google Cloud Console
+1. **Create Firebase project** in Firebase Console
+2. **Download configuration files:**
+   - `google-services.json` → `android/app/`
+   - `GoogleService-Info.plist` → `ios/` (iOS setup)
+3. **Enable Firebase services:**
+   - Cloud Messaging (FCM)
+   - Remote Config
+   - Analytics
+   - Authentication
+   - Crashlytics
+   - Performance Monitoring
+   - In-App Messaging
+   - Cloud Storage
+   - App Distribution
 
-### Testing
+### Testing Services
 
+**Cloud Messaging:**
 ```bash
-# Start mock backend
-node mock-backend/server.js
-
-# Send test messages
 node scripts/send-data-message.js YOUR_FCM_TOKEN dataOnly
-node scripts/send-to-topic.js tech_news
-node scripts/send-to-channel.js YOUR_TOKEN important
 ```
 
-## 📖 Key Concepts Demonstrated
+**Remote Config:**
+- Update parameters in Firebase Console
+- Fetch and activate in app
 
-### Threading Model
-- **JavaScript Thread:** Foreground message processing
-- **Headless JS:** Background/quit state data processing
-- **Native Service:** Always-on FCM listener at system level
+**Analytics:**
+- Events automatically logged
+- View in Firebase Console (24-48 hour delay)
 
-### App State Handling
-- **Foreground:** Custom UI, full React access
-- **Background:** Headless JS, AsyncStorage, API calls
-- **Quit:** Headless JS spawned on-demand with high priority
+**Authentication:**
+- Use AuthScreen to sign up/sign in
+- Password reset via email
 
-### Production Patterns
-- ✅ Automated token refresh and synchronization
-- ✅ Stray token detection via send failure
-- ✅ Multi-device support with backend coordination
-- ✅ Channel-based importance levels
-- ✅ Topic-based scalable broadcasting
-- ✅ Proper error handling and retry logic
+**Crashlytics:**
+- Trigger test crash in app
+- View reports in Firebase Console
 
-## 🎓 Advanced Features
+**Performance:**
+- HTTP metrics tracked automatically
+- Custom traces via PerformanceScreen
 
-### Message Priority
-```javascript
-{
-  android: {
-    priority: 'high'  // Required for background data delivery
-  }
-}
+**In-App Messaging:**
+- Create campaigns in Firebase Console
+- Trigger events in app
+
+**Deep Linking:**
+```bash
+adb shell am start -a android.intent.action.VIEW -d "myapp://product/123"
 ```
 
-### Combined Messages
-```javascript
-{
-  notification: { title, body },  // System display
-  data: { orderId, action }       // Custom payload
-}
-```
+**Cloud Storage:**
+- Upload images via StorageScreen
+- View files in Firebase Console
 
-### Conditional Logic
+**App Distribution:**
+- Build release APK: `cd android && ./gradlew assembleRelease`
+- Upload to Firebase Console
+- Invite testers
+
+## 📖 Key Concepts
+
+### Service Architecture
+- **Modular Services:** Separate service files for each Firebase feature
+- **Type Safety:** TypeScript interfaces for all service methods
+- **Centralized Navigation:** Deep linking with React Navigation
+- **State Management:** React hooks and context for auth state
+- **Error Handling:** Crashlytics integration for all services
+
+### Firebase Integration Patterns
+- **Authentication:** Email/password with session persistence
+- **Remote Config:** Feature flags with default values
+- **Analytics:** Automatic screen tracking and custom events
+- **Performance:** HTTP metrics and custom trace instrumentation
+- **Storage:** File upload with progress tracking
+- **Messaging:** Multi-channel notifications with background processing
+
+### Production Best Practices
+- ✅ Service abstraction layers for maintainability
+- ✅ Error tracking with Crashlytics
+- ✅ Performance monitoring for HTTP requests
+- ✅ User analytics for engagement tracking
+- ✅ Feature flags for controlled rollouts
+- ✅ Deep linking for improved UX
+- ✅ Cloud storage with proper error handling
+- ✅ In-app messaging for user engagement
+
+## 🎓 Advanced Implementations
+
+### Remote Config Targeting
 ```typescript
-messaging().setBackgroundMessageHandler(async (message) => {
-  if (message.data.type === 'urgent') {
-    await createLocalNotification(message.data);
-  } else {
-    await saveToDatabase(message.data);
-  }
+// Fetch with user properties
+await remoteConfig().setConfigSettings({
+  minimumFetchIntervalMillis: 3600000, // 1 hour
 });
+await remoteConfig().fetchAndActivate();
+
+// Platform-specific values
+const welcomeMessage = remoteConfig()
+  .getValue('welcome_message')
+  .asString();
+```
+
+### Performance Traces
+```typescript
+const trace = perf().newTrace('custom_operation');
+await trace.start();
+// ... operation
+await trace.stop();
+```
+
+### In-App Message Triggers
+```typescript
+// Trigger event for campaign
+await analytics().logEvent('campaign_trigger', {
+  screen_name: 'performance',
+  user_type: 'premium',
+});
+```
+
+### Deep Link Handling
+```typescript
+// Configure linking in navigation
+const linking = {
+  prefixes: ['myapp://'],
+  config: {
+    screens: {
+      Product: 'product/:id',
+      Profile: 'profile/:userId',
+    },
+  },
+};
 ```
 
 ## 📱 Supported Platforms
 
 - ✅ **Android** - Full implementation (API 24+)
-- ⏳ **iOS** - Planned (APNs integration coming soon)
-- ⏳ **Web** - Planned (Web push notifications)
+- ⏳ **iOS** - Firebase configured, UI pending
 
-## 🔒 Security Best Practices
+## 🔒 Security
 
-- Service account credentials in gitignored `secrets/` directory
-- Environment-based configuration for production
-- Token validation on backend before message delivery
-- Proper error handling for invalid tokens
+- Firebase service account credentials (gitignored)
+- Authentication with email verification
+- Storage security rules in Firebase Console
+- Crashlytics sanitization of sensitive data
 
-## 📊 Performance Considerations
+## 📊 Performance
 
-- Idempotent channel creation (no overhead on app restart)
-- Efficient topic subscriptions (FCM-managed, no backend storage)
-- Background message batching for reduced battery impact
-- Headless JS timeout handling for long-running tasks
+- Automatic HTTP request tracking
+- Custom trace instrumentation
+- Screen rendering metrics
+- App startup monitoring
+- Network performance analysis
 
 ## 🤝 Contributing
 
-This is a demonstration project showcasing FCM implementation patterns. Feel free to fork and adapt for your own use cases.
+This project demonstrates comprehensive Firebase integration patterns. Fork and adapt for your specific needs.
 
 ## 📄 License
 
-MIT License - Feel free to use this code in your projects.
+MIT License - Use this code in your projects.
 
 ## 🔗 Resources
 
