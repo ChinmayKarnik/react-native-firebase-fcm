@@ -74,8 +74,8 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 
-# Co-pilot chats
-Co-pilot chats/
+# Internal files (reference materials, chats, notes)
+.internal/
 
 # Secrets and sensitive files
 secrets/
@@ -84,8 +84,3 @@ secrets/
 !tsconfig.json
 !app.json
 !jest.config.json
-
-# Upwork and personal files
-upwork-project-description.txt
-**/reply*.txt
-context.txt
